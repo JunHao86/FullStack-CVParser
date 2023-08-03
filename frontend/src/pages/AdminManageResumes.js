@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./css/AdminManageResumes.css";
 import { AiOutlineSearch } from "react-icons/ai";
 import { resumeAPI } from "../api/resumeAPI";
@@ -9,10 +9,20 @@ import { BsFillFileEarmarkTextFill } from "react-icons/bs";
 import { BsFillFileEarmarkArrowDownFill } from "react-icons/bs";
 import { MdDeleteForever } from "react-icons/md";
 import { AiTwotoneDelete } from "react-icons/ai";
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import { toast } from "react-toastify";
 import ResumeStatistics from "./Chart";
+import { fileUtil } from "../utility/fileUtil";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PDFDocument from "../utility/PDFDocument";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import DotMenu from "../components/DotMenu";
+import DotMenu2 from "../components/DotMenu2";
+import { excelUtil } from "../utility/excelUtil";
+import { wordUtil } from "../utility/wordUtil";
 
 const AdminManageResumes = () => {
+  const pdfLinkRef = useRef([]);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams("");
   const [searchInput, setSearchInput] = useState("");
@@ -22,11 +32,23 @@ const AdminManageResumes = () => {
   const [resumeExportData, setResumeExportData] = useState([]);
   const [size, setSize] = useState(5);
   const [showStats, setShowStats] = useState(false);
+  const [dotMenu, setDotMenu] = useState(false);
 
   // console.log(searchParams.get("page"));
 
   const handleShowStats = () => {
     setShowStats((prevShowStats) => !prevShowStats);
+  };
+
+  const mapResumes = (resumes) => {
+    return resumes.map((resume) => {
+      resume.companiesDetails = JSON.parse(resume.companiesDetails);
+      resume.primarySkills = JSON.parse(resume.primarySkills);
+      resume.secondarySkills = JSON.parse(resume.secondarySkills);
+      resume.spokenLanguages = JSON.parse(resume.spokenLanguages);
+      resume.educationDetails = JSON.parse(resume.educationDetails);
+      return resume;
+    });
   };
 
   useEffect(() => {
@@ -35,7 +57,7 @@ const AdminManageResumes = () => {
       .adminGetAllResumes(+searchParams.get("page"), searchInput, size)
       .then((res) => {
         console.log(res.data);
-        setResumes(res.data.resumeList);
+        setResumes(mapResumes(res.data.resumeList));
         setTotalPages(res.data.totalPages);
         // setSize(+searchParams.get("size"))
       });
@@ -55,7 +77,7 @@ const AdminManageResumes = () => {
     setSearchInput(e.target.value);
     resumeAPI.adminGetAllResumesSearch(1, e.target.value, size).then((res) => {
       console.log(res.data);
-      setResumes(res.data.resumeList);
+      setResumes(mapResumes(res.data.resumeList));
       setTotalPages(res.data.totalPages);
       setPage(1);
       navigate(`/admin/resumes?page=1&keywords=${e.target.value}&size=${size}`);
@@ -74,74 +96,12 @@ const AdminManageResumes = () => {
     }
   };
 
-  const handleSingleExcelDownload = (resume) => {
-    exportToExcelCustom(resume);
-  };
-
-  const convertToJsonList = (resumes) => {
-    const resumeDatas = resumes.map((resume) => {
-      return {
-        email: resume.user.email,
-        firstname: resume.user.firstName,
-        lastname: resume.user.lastName,
-        resume_file_name: resume.filename,
-        resume_name: resume.name,
-        resume_email: resume.email,
-        resume_mobile: resume.mobile,
-        resume_employment_experiences: resume.yearsOfExperience,
-        resume_skills: resume.skills.join(", "),
-        resume_companies: resume.companies.join(", "),
-        resume_createdAt: resume.createdAt,
-        resume_updatedAt: resume.UpdatedAt,
-      };
-    });
-    setResumeExportData(resumeDatas);
-    return resumeDatas;
-  };
-
-  const convertToJson = (resume) => {
-    return [
-      {
-        email: resume.user.email,
-        firstname: resume.user.firstName,
-        lastname: resume.user.lastName,
-        resume_file_name: resume.filename,
-        resume_name: resume.name,
-        resume_email: resume.email,
-        resume_mobile: resume.mobile,
-        resume_employment_experiences: resume.yearsOfExperience,
-        resume_skills: resume.skills.join(", "),
-        resume_companies: resume.companies.join(", "),
-        resume_createdAt: resume.createdAt,
-        resume_updatedAt: resume.UpdatedAt,
-      },
-    ];
-  };
-
-  const exportToExcelCustom = (resume) => {
-    const worksheet = utils.json_to_sheet(convertToJson(resume));
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Sheet 1");
-    const excelData = write(workbook, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelData], { type: "application/octet-stream" });
-    saveAs(data, `${resume.filename}.xlsx`);
-  };
-
-  const exportToExcel = () => {
-    const worksheet = utils.json_to_sheet(convertToJsonList(resumes));
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Sheet 1");
-    const excelData = write(workbook, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelData], { type: "application/octet-stream" });
-    saveAs(data, "Resume_data.xlsx");
-  };
-
   const handleResumeDelete = (userId, resumeId) => {
     // console.log("Resume id: ",id)
     resumeAPI.adminDeleteResume(userId, resumeId).then((res) => {
       resumeAPI.adminGetAllResumes(page, searchInput, size).then((res) => {
         console.log(res.data);
-        setResumes(res.data.resumeList);
+        setResumes(mapResumes(res.data.resumeList));
         setTotalPages(res.data.totalPages);
       });
       toast.success("Resume deleted successfully.");
@@ -162,13 +122,13 @@ const AdminManageResumes = () => {
       )
       .then((res) => {
         console.log(res.data);
-        setResumes(res.data.resumeList);
+        setResumes(mapResumes(res.data.resumeList));
         setTotalPages(res.data.totalPages);
       });
   };
 
   return (
-    <div className=" admin-resume-container">
+    <div className=" admin-resume-container ">
       <div class="table-card mt-4">
         <div className="table-card-container">
           <h1>Manage Resumes</h1>
@@ -212,7 +172,7 @@ const AdminManageResumes = () => {
               />
               <button
                 className="btn btn-secondary btn-custom"
-                onClick={exportToExcel}
+                onClick={() => excelUtil.exportToExcel(resumes)}
               >
                 Export to excel
               </button>
@@ -220,18 +180,18 @@ const AdminManageResumes = () => {
           </div>
         </div>
         {showStats && (
-        <div className="resume-statistics">
-          <h2>Resumes Statistics</h2>
-          <div>
-            <ResumeStatistics resumes={resumes} />
+          <div className="resume-statistics">
+            <h2>Resumes Statistics</h2>
+            <div>
+              <ResumeStatistics resumes={resumes} />
+            </div>
           </div>
-        </div>
         )}
 
         <br></br>
 
-        <div class="table-responsive">
-          <table class="table table-striped-columns custom-table">
+        <div class="table-responsive back">
+          <table class="table table-striped-columns custom-table back">
             <thead>
               <tr class="table-secondary">
                 {/* <th>Id</th> */}
@@ -246,6 +206,8 @@ const AdminManageResumes = () => {
                 <th></th>
                 <th></th>
                 <th></th>
+                {/* <th></th>
+                <th></th> */}
               </tr>
             </thead>
             <tbody>
@@ -266,12 +228,6 @@ const AdminManageResumes = () => {
                     </Link>
                   </td>
                   <td class="text-center">
-                    <BsFillFileEarmarkArrowDownFill
-                      className="icon"
-                      onClick={() => handleSingleExcelDownload(resume)}
-                    />
-                  </td>
-                  <td class="text-center">
                     <AiTwotoneDelete
                       className="icon icon-delete"
                       onClick={() =>
@@ -279,28 +235,108 @@ const AdminManageResumes = () => {
                       }
                     />
                   </td>
+
+                  <td class="text-center">
+                    <DotMenu2>
+                      <div
+                        className={
+                          index + 1 !== resumes.length
+                            ? "dot-menu"
+                            : "dot-menu dot-menu-flip"
+                        }
+                        onMouseLeave={() => setDotMenu(false)}
+                      >
+                        <p
+                          onClick={() => excelUtil.exportToExcelCustom(resume)}
+                          className="border-b"
+                        >
+                          Download Excel
+                        </p>
+                        <p
+                          onClick={() =>
+                            fileUtil.firebaseFileDownload(resume.fileRef)
+                          }
+                          className="border-b"
+                        >
+                          Download Resume
+                        </p>
+                        <p
+                          className="border-b"
+                          onClick={() => pdfLinkRef.current[index].click()}
+                        >
+                          Download Resume PDF
+                        </p>
+                        <p onClick={() => wordUtil.generateDocx(resume)}>
+                          Download Resume Word
+                        </p>
+                      </div>
+                    </DotMenu2>
+                  </td>
+                  <div className="hidden">
+                    {resume && (
+                      <PDFDownloadLink
+                        document={<PDFDocument data={resume} />}
+                        fileName={resume.filename + ".pdf"}
+                      >
+                        {({ blob, url, loading, error }) =>
+                          loading ? (
+                            "Loading document..."
+                          ) : (
+                            <div
+                              ref={(element) =>
+                                (pdfLinkRef.current[index] = element)
+                              }
+                            >
+                              <BsFillFileEarmarkArrowDownFill className="icon" />
+                            </div>
+                          )
+                        }
+                      </PDFDownloadLink>
+                    )}
+                  </div>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div class="pagination">
+          {/* <div class="pagination">
             <span>
               {page} of {totalPages}
             </span>
             {page > 1 && (
               <div class="arrow">
-                <span onClick={() => goToPrev()}>Prev</span>
+                <span className="prev-arrow" onClick={() => goToPrev()}>
+                  Prev
+                </span>
               </div>
             )}
-            {page === 1 && <div class="arrow-disabled">Prev</div>}
+            {page === 1 && <div class="arrow-disabled-2">Prev</div>}
             <span> {page} </span>
             {page < totalPages && (
               <div class="arrow">
                 <span onClick={goToNext}>Next</span>
               </div>
             )}
-          </div>
+          </div> */}
+        </div>
+        <div class="pagination">
+          <span>
+            {page} of {totalPages}
+          </span>
+          {page > 1 && (
+            <div class="arrow">
+              <span className="prev-arrow" onClick={() => goToPrev()}>
+                Prev
+              </span>
+            </div>
+          )}
+          {page === 1 && <div class="arrow-disabled-2">Prev</div>}
+          <span> {page} </span>
+          {page < totalPages && (
+            <div class="arrow">
+              <span onClick={goToNext}>Next</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

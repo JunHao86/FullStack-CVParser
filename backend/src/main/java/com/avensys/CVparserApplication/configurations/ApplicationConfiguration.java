@@ -17,6 +17,13 @@ public class ApplicationConfiguration {
 //    @Value("${cloudinary.url}")
 //    private String cloudinaryAPIURL;
 
+    // Fire base initializer
+//    private final FirebaseInitializer firebaseInitializer;
+//
+//    public ApplicationConfiguration(FirebaseInitializer firebaseInitializer) {
+//        this.firebaseInitializer = firebaseInitializer;
+//    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -40,5 +47,11 @@ public class ApplicationConfiguration {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
+
+//    @PostConstruct
+//    public void initializeFirebase() {
+//        this.firebaseInitializer.initializeFirebase();
+//    }
+
 
 }

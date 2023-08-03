@@ -1,0 +1,183 @@
+/* Upload.css */
+.upload-table {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.upload-table td {
+  padding: 10px;
+}
+
+.upload-table button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upload-table button:hover {
+  background-color: #0056b3;
+}
+
+.upload-container{
+  display: flex;
+  color:white;
+  height: 100vh;
+  /* gap:1rem; */
+}
+
+form h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.viewer-container {
+background-color: rgb(205, 216, 226);
+width:650px;
+height: 100%;
+padding:15px;
+border-radius: 20px;
+}
+
+.upload-left-section{
+  width: 50%;
+  /* width:1000px; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* border: red 2px solid; */
+}
+
+.upload-right-section{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding:40px;
+  padding-top: 100px;
+  width: 50%;
+  /* border: red 2px solid; */
+}
+
+.drop-outer-border{
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  color:gray;
+}
+
+.drop-inner-border-2{
+  border:2px grey dashed;
+  height:100%;
+  border-radius: 10px;
+  padding:60px 230px 60px 230px;
+}
+
+.upload-icon {
+  font-size: 5rem;
+}
+
+.upload-icon-success {
+  font-size: 5rem;
+  color: green;
+}
+
+.drag-over{
+ background-color: rgba(253, 253, 253, 0.9);
+}
+
+.upload-header-icon {
+  font-size: 3rem;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.subscription-container h2{
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.subscription-container > p{
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+}
+
+.subscription-price {
+  font-size: 1.2rem !important;
+  font-weight: 300;
+  margin: 0;
+  padding: 0;
+}
+
+
+.subscription-container div {
+  margin-top: 10px;
+}
+
+.subscription-container div p {
+  margin: 0;
+  padding: 0;
+}
+
+.tick-icon{
+  color: green;
+  font-size: 1.4rem;
+}
+
+.cancel-icon {
+  cursor: pointer;
+  position: absolute;
+  right:-12px;
+  top: -12px;
+  font-size: 2rem;
+}
+
+.arrow-icon{
+  margin: 0;
+  font-size: 1.8rem;
+  color: #007BFF;
+  cursor: pointer;
+}
+
+.arrows{
+  margin-bottom: 10px;
+}
+
+.arrow-disabled{
+  margin: 0;
+  color: #55a7ff;
+  font-size: 1.8rem;
+}
+
+.count {
+  color: rgb(33, 33, 33);
+}
+
+.file-display {
+  overflow: auto;
+  /* border: 2px solid red; */
+  max-height:150px;
+  margin-bottom: 10px;
+}
+
+.delete-icon{
+  margin-left: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn.input-file-btn{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.multiThreadUpload-icon{
+  color:green
+}
